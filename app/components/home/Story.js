@@ -8,7 +8,7 @@ function Story({ image, username }) {
     <View style={styles.container}>
       <Image style={styles.story} source={image} />
       <AppText>
-        {username.length > 5 ? username.slice(0, 7) + "..." : username}
+        {username.length > 5 ? username.slice(0, 6) + "..." : username}
       </AppText>
     </View>
   );
@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
     borderRadius: 35,
     borderWidth: 3,
     height: 70,
-    marginLeft: 6,
+    marginLeft: 16,
     resizeMode: "contain",
     width: 70,
   },

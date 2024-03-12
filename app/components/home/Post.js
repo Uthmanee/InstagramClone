@@ -9,19 +9,41 @@ import {
 import { Divider } from "@rneui/base";
 
 import AppText from "../AppText";
-import User from "../User";
-import RowContainer from "../RowContainer";
-
+import { db, firebase } from "../../db/firebase";
 import Icon from "../Icon";
+import RowContainer from "../RowContainer";
+import User from "../User";
 
 function Post({
   caption,
   comments,
-  likes,
+  id,
+  likes_by_users,
+  owner_email,
   postImageUrl,
   profilePicture,
   user,
 }) {
+  const handleLike = (likes_by_users) => {
+    const currentLikeStatus = !likes_by_users.includes(
+      firebase.auth().currentUser.email
+    );
+    db.collection("users")
+      .doc(owner_email)
+      .collection("posts")
+      .doc(id)
+      .update({
+        likes_by_users: currentLikeStatus
+          ? firebase.firestore.FieldValue.arrayUnion(
+              firebase.auth().currentUser.email
+            )
+          : firebase.firestore.FieldValue.arrayRemove(
+              firebase.auth().currentUser.email
+            ),
+      })
+      .then(() => {})
+      .catch((error) => console.log(error));
+  };
   return (
     <View style={styles.postContainer}>
       <Divider width={1} orientation="vertical" />
@@ -30,7 +52,8 @@ function Post({
       <PostFooter
         caption={caption}
         comments={comments}
-        likes={likes}
+        handleLike={handleLike}
+        likes_by_users={likes_by_users}
         user={user}
       />
     </View>
@@ -49,19 +72,30 @@ const PostHeader = ({ profilePicture, user }) => {
 const PostImage = ({ postImageUrl }) => {
   return (
     <View style={styles.postImageContainer}>
-      <Image style={styles.postImage} source={postImageUrl} />
+      <Image style={styles.postImage} source={{ uri: postImageUrl }} />
     </View>
   );
 };
 
-const PostFooter = ({ caption, comments, likes, user }) => {
+const PostFooter = ({
+  caption,
+  comments,
+  handleLike,
+  likes_by_users,
+  user,
+}) => {
   return (
     <View style={styles.footer}>
       <RowContainer style={styles.footerContainer}>
         <RowContainer style={styles.leftFooterIcon}>
           <Icon
             dimension={30}
-            icon="https://img.icons8.com/external-tanah-basah-basic-outline-tanah-basah/96/FFFFFF/external-line-wedding-tanah-basah-basic-outline-tanah-basah-24.png"
+            icon={
+              likes_by_users.includes(firebase.auth().currentUser.email)
+                ? "https://img.icons8.com/fluency/48/like.png"
+                : "https://img.icons8.com/external-tanah-basah-basic-outline-tanah-basah/96/FFFFFF/external-line-wedding-tanah-basah-basic-outline-tanah-basah-24.png"
+            }
+            onPress={() => handleLike(likes_by_users)}
           />
           <Icon
             dimension={30}
@@ -77,7 +111,7 @@ const PostFooter = ({ caption, comments, likes, user }) => {
           icon="https://img.icons8.com/ios/50/FFFFFF/bookmark-ribbon--v1.png"
         />
       </RowContainer>
-      <Likes likes={likes} />
+      <Likes likes_by_users={likes_by_users} />
       <Caption caption={caption} user={user} />
       <CommentSection comments={comments} />
       <Comments comments={comments} />
@@ -85,8 +119,8 @@ const PostFooter = ({ caption, comments, likes, user }) => {
   );
 };
 
-const Likes = ({ likes }) => (
-  <AppText>{likes.toLocaleString("en")} likes</AppText>
+const Likes = ({ likes_by_users }) => (
+  <AppText>{likes_by_users.length.toLocaleString("en")} likes</AppText>
 );
 
 const Caption = ({ caption, user }) => {

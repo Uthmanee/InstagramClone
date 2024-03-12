@@ -6,7 +6,7 @@ import AppText from "./AppText";
 function User({ image, username }) {
   return (
     <View style={styles.container}>
-      <Image style={styles.userImage} source={image} />
+      <Image style={styles.userImage} source={{ uri: image }} />
       <AppText style={styles.username}>{username}</AppText>
     </View>
   );

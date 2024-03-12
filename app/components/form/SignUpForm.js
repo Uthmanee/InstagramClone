@@ -5,8 +5,9 @@ import * as Yup from "yup";
 import Validator from "email-validator";
 
 import AppInput from "./AppInput";
-import SubmitButton from "./SubmitButton";
 import AppText from "../AppText";
+import { firebase, db } from "../../db/firebase";
+import SubmitButton from "./SubmitButton";
 import { useNavigation } from "@react-navigation/native";
 
 const validationSchema = Yup.object().shape({
@@ -23,9 +24,38 @@ const validationSchema = Yup.object().shape({
 
 function SignUpForm(props) {
   const navigation = useNavigation();
+
+  const getRandomProfilePicture = async () => {
+    const response = await fetch("https://randomuser.me/api");
+    const data = await response.json();
+    return data.results[0].picture.large;
+  };
+
+  const onSignUp = async (email, password, username) => {
+    try {
+      const userCredential = await firebase
+        .auth()
+        .createUserWithEmailAndPassword(email, password);
+      console.log("Sign up successful!");
+
+      db.collection("users")
+        .doc(userCredential.user.email)
+        .set({
+          owner_uid: userCredential.user.uid,
+          username,
+          email: userCredential.user.email,
+          profilePicture: await getRandomProfilePicture(),
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <Formik
       initialValues={{ email: "", username: "", password: "" }}
+      onSubmit={(values) =>
+        onSignUp(values.email, values.password, values.username)
+      }
       validateOnMount={true}
       validationSchema={validationSchema}
     >
@@ -61,7 +91,7 @@ function SignUpForm(props) {
                   : "red",
             }}
             textContentType="emailAddress"
-            value={values.email}
+            value={values.username}
           />
           <AppInput
             autoCapitalize="none"

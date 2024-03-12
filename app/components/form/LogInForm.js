@@ -6,7 +6,7 @@ import Validator from "email-validator";
 
 import AppInput from "./AppInput";
 import AppText from "../AppText";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { firebase } from "../../db/firebase";
 import SubmitButton from "./SubmitButton";
 import { useNavigation } from "@react-navigation/native";
 
@@ -20,17 +20,19 @@ function LogInForm(props) {
 
   const onLogin = async (email, password) => {
     try {
-      const auth = getAuth();
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      console.log(userCredential.user);
+      const userCredential = await firebase
+        .auth()
+        .signInWithEmailAndPassword(email, password);
       console.log("Login Successful");
     } catch (error) {
-      // Alert.alert(error.message);
-      console.log(error.message);
+      Alert.alert(
+        "Authentication Error",
+        error.message + "\nWhat would you like to do?",
+        [
+          { text: "Okay", style: "cancel", onPress: () => {} },
+          { text: "Sign Up", onPress: () => navigation.push("SignUpScreen") },
+        ]
+      );
     }
   };
   return (

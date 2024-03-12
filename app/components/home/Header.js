@@ -2,6 +2,7 @@ import React from "react";
 import { Text, StyleSheet, View, Image, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
+import { firebase } from "../../db/firebase";
 import Icon from "../Icon";
 
 // Messenger https://img.icons8.com/ios/50/FFFFFF/facebook-messenger--v1.png
@@ -11,9 +12,18 @@ import Icon from "../Icon";
 function Header(props) {
   const navigation = useNavigation();
 
+  const handleSignout = async () => {
+    try {
+      await firebase.auth().signOut();
+      console.log("signed out");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <TouchableOpacity>
+      <TouchableOpacity onPress={handleSignout}>
         <Image
           style={styles.logo}
           source={require("../../assets/logo_white.png")}
