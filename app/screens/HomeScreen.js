@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FlatList, StyleSheet } from "react-native";
+import { FlatList, StyleSheet, View } from "react-native";
 import Constants from "expo-constants";
 
 import BottomTab from "../components/home/BottomTab";
@@ -19,7 +19,6 @@ function HomeScreen(props) {
       .onAuthStateChanged((user) =>
         user ? setUserState(user) : setUserState(null)
       );
-    // if (!userState) return;
     const unsubscribe = db.collectionGroup("posts").onSnapshot(
       (snapshot) => {
         setPosts(snapshot.docs.map((doc) => doc.data()));
@@ -34,22 +33,24 @@ function HomeScreen(props) {
     <Screen style={styles.container}>
       <Header />
       <Stories />
-      <FlatList
-        data={posts}
-        keyExtractor={(user) => user.id}
-        renderItem={({ item }) => (
-          <Post
-            caption={item.caption}
-            comments={item.comments}
-            id={item.id}
-            likes_by_users={item.likes_by_users}
-            owner_email={item.owner_email}
-            postImageUrl={item.imageUrl}
-            profilePicture={item.profile_picture}
-            user={item.user}
-          />
-        )}
-      />
+      <View style={{ paddingBottom: 20, flex: 1 }}>
+        <FlatList
+          data={posts}
+          keyExtractor={(user) => user.id}
+          renderItem={({ item }) => (
+            <Post
+              caption={item.caption}
+              comments={item.comments}
+              id={item.id}
+              likes_by_users={item.likes_by_users}
+              owner_email={item.owner_email}
+              postImageUrl={item.imageUrl}
+              profilePicture={item.profile_picture}
+              user={item.user}
+            />
+          )}
+        />
+      </View>
       <BottomTab icons={bottomTabIcons} />
     </Screen>
   );
